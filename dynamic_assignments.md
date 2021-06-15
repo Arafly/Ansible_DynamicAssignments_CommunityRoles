@@ -159,6 +159,20 @@ We want to be able to choose which Load Balancer to use, Nginx or Apache, so we 
 
 - Decide if you want to develop your own roles (apache), or find available ones from the community(nginx).
 
+> For the apache role. I cloned the work of Shubham Rasal at this <https://github.com/ShubhamRasal/ansible-playbooks.git>, as I couldn't find a exclusive apache role on the ansible-galaxy.
+
+- Check afterwards by running:
+
+`$ ansible-galaxy role list`
+
+```
+Output
+- myapache, (unknown version)
+- webserver, (unknown version)
+- mysql, (unknown version)
+- nginx, 0.20.0
+```
+
 - Update both static-assignment and site.yml files to refer the roles
 Important Hints:
 
@@ -196,5 +210,37 @@ load_balancer_is_required: true
 The same must work with apache LB, so we can switch it by setting respective environmental variable to true and other to false.
 
 To test this, you can update inventory for each environment and run Ansible against each environment.
+
+`$ ansible-playbook -i /home/araflyayinde/ansible-artifact/inventory/dev /home/araflyayinde/ansible-artifact/playbooks/site.yml`
+
+```
+Output
+
+[DEPRECATION WARNING]: The TRANSFORM_INVALID_GROUP_CHARS settings is set to allow bad characters in group names by default, this will change, but still be user 
+configurable on deprecation. This feature will be removed in version 2.10. Deprecation warnings can be disabled by setting deprecation_warnings=False in 
+ansible.cfg.
+[WARNING]: Invalid characters were found in group names but not replaced, use -vvvv to see details
+PLAY [Ensure to include dynamic variables] ************************************************************************************************************************
+TASK [Gathering Facts] ********************************************************************************************************************************************
+ok: [mysql]
+ok: [file-storage]
+ok: [webserver1]
+ok: [webserver2]
+ok: [nginx]
+TASK [collate variables from env specific file, if it exists] *****************************************************************************************************
+fatal: [file-storage]: FAILED! => {"msg": "No file was found when using first_found. Use errors='ignore' to allow this task to be skipped if no files are found"}
+fatal: [webserver2]: FAILED! => {"msg": "No file was found when using first_found. Use errors='ignore' to allow this task to be skipped if no files are found"}
+fatal: [webserver1]: FAILED! => {"msg": "No file was found when using first_found. Use errors='ignore' to allow this task to be skipped if no files are found"}
+fatal: [mysql]: FAILED! => {"msg": "No file was found when using first_found. Use errors='ignore' to allow this task to be skipped if no files are found"}
+fatal: [nginx]: FAILED! => {"msg": "No file was found when using first_found. Use errors='ignore' to allow this task to be skipped if no files are found"}
+PLAY RECAP ********************************************************************************************************************************************************
+file-storage               : ok=1    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+mysql                      : ok=1    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+nginx                      : ok=1    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+webserver1                 : ok=1    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+webserver2                 : ok=1    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+```
+
+Please ignore the failure. The point is to be able to activate the load balancer, to dis/enable nginx or apache by setting these in the respective environment’s env-vars file.
 
 ### Congratulations!
